@@ -1,0 +1,7 @@
+download_manifest.csv
+cookies.txt
+episodes/
+*.mp4
+*.part
+*.ytdl
+*.wav
