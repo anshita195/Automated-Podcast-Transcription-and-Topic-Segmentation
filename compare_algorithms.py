@@ -21,7 +21,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-BASELINE_DIR = "output_json"
+BASELINE_DIR = "output_json_baseline"
 EMBEDDING_DIR = "output_json_embedding"
 OUT_DIR = "comparison_outputs"
 
