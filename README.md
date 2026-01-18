@@ -151,7 +151,7 @@ The following components have been completed:
 - Naming standardization
 - Manifest generation
 - Reproducible pipeline setup
-- **Week 3: Topic Segmentation, Keywords, and Summaries**
+- Topic Segmentation, Keywords, and Summaries
 
 ## Week 3: Topic Segmentation and Analysis
 
@@ -174,7 +174,7 @@ Week 3 focuses on converting transcripts into structured, topic-wise representat
 - Applies TF-IDF vectorization on chunks
 - Computes cosine similarity between consecutive chunks
 - Detects topic boundaries where similarity drops below threshold
-- Threshold: `mean - k*std` or percentile-based
+- Threshold: `mean - k*std` 
 
 **Characteristics:**
 - Uses lexical similarity (bag-of-words approach)
@@ -190,7 +190,7 @@ Week 3 focuses on converting transcripts into structured, topic-wise representat
 - Generates semantic embeddings using SentenceTransformers (`all-MiniLM-L6-v2`)
 - Computes cosine similarity between consecutive sentence embeddings
 - Detects topic boundaries where semantic similarity drops below threshold
-- Threshold: `mean - k*std` or percentile-based
+- Threshold: `mean - k*std`
 
 **Characteristics:**
 - Uses semantic similarity (meaning-based approach)
@@ -242,9 +242,9 @@ The embedding-based approach leverages semantic understanding, which is crucial 
 **Google Drive:** https://drive.google.com/drive/folders/1YopGLkQYHibzAyZu4P6VmW03x-z_RQPC?usp=sharing
 
 The folder contains:
-- `output_json_baseline/` - Baseline algorithm segments (346 JSON files)
-- `output_json_embedding/` - Embedding algorithm segments (346 JSON files)
-- `output_kws_summaries/json_updated/` - Segments with keywords and summaries (228 JSON files)
+- `output_json_baseline/` - Baseline algorithm segments 
+- `output_json_embedding/` - Embedding algorithm segments 
+- `output_kws_summaries/json_updated/` - Segments with keywords and summaries 
 
 **Local outputs (in repository):**
 - `segments_all_baseline.csv` - Combined baseline segments
