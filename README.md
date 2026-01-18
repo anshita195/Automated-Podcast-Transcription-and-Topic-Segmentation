@@ -151,38 +151,170 @@ The following components have been completed:
 - Naming standardization
 - Manifest generation
 - Reproducible pipeline setup
+- **Week 3: Topic Segmentation, Keywords, and Summaries**
 
----
+## Week 3: Topic Segmentation and Analysis
 
-## Planned Next Steps
+### Overview
 
-Future phases of the project will include:
+Week 3 focuses on converting transcripts into structured, topic-wise representations by:
+1. Segmenting transcripts into topics
+2. Extracting keywords for each segment
+3. Creating short summaries for each segment
 
-- Automatic topic boundary detection
-- Segment-level transcript alignment
-- Embedding generation
-- Clustering-based segmentation
-- Summarization
-- Visualization and navigation interface
+### Topic Segmentation Algorithms
 
----
+#### Algorithm 1: Baseline (TF-IDF + Chunk-based Similarity)
 
-## Reproducibility
+**File:** `baseline_segmentation.py`
 
-The entire dataset can be regenerated from scratch using the provided scripts:
+**Method:**
+- Splits transcript into sentences
+- Groups sentences into fixed-size chunks (default: 4 sentences per chunk)
+- Applies TF-IDF vectorization on chunks
+- Computes cosine similarity between consecutive chunks
+- Detects topic boundaries where similarity drops below threshold
+- Threshold: `mean - k*std` or percentile-based
 
-1. Convert Parquet to CSV
-2. Clean metadata
-3. Download episode audio
-4. Standardize format (WAV, 16 kHz, mono)
-5. Apply preprocessing
+**Characteristics:**
+- Uses lexical similarity (bag-of-words approach)
+- Works at chunk level (4 sentences)
+- Produces fewer, longer segments
 
-This ensures full reproducibility of the dataset pipeline.
+#### Algorithm 2: Embedding-based (Sentence Transformers)
 
----
+**File:** `embedding_segmentation.py`
+
+**Method:**
+- Splits transcript into individual sentences
+- Generates semantic embeddings using SentenceTransformers (`all-MiniLM-L6-v2`)
+- Computes cosine similarity between consecutive sentence embeddings
+- Detects topic boundaries where semantic similarity drops below threshold
+- Threshold: `mean - k*std` or percentile-based
+
+**Characteristics:**
+- Uses semantic similarity (meaning-based approach)
+- Works at sentence level (1 sentence = 1 unit)
+- Produces more, shorter, and more consistent segments
+
+### Comparison and Evaluation
+
+**Quantitative Analysis:**
+
+The comparison results are available in `comparison_outputs/`:
+- `comparison_summary.csv` - Statistical comparison of both algorithms (segment counts, average word counts, standard deviations)
+- `boundary_overlap.csv` - Boundary overlap analysis (Jaccard similarity between algorithms)
+- `plots/segment_count_dist.png` - Distribution of segment counts per episode
+- `plots/segment_length_dist.png` - Distribution of average segment lengths (words)
+
+**Note:** You can examine detailed examples by comparing segments in `segments_all_baseline.csv` and `segments_all_embedding.csv` for the same episode to see the differences in segmentation approaches.
+
+**Key Findings:**
+- **Embedding algorithm produces significantly more segments** than baseline
+- **Embedding algorithm produces smaller and more consistent segment lengths** (average segment length is much smaller)
+- Baseline algorithm produces fewer segments with highly variable lengths (some very short, some extremely long)
+
+**Qualitative Evaluation:**
+
+After manual review of sample segments from both algorithms:
+
+1. **Are the segments meaningful?**
+   - **Embedding algorithm:** Yes, segments are more meaningful and coherent. Each segment focuses on a single topic or subtopic.
+   - **Baseline algorithm:** Segments are less coherent, often mixing multiple topics within a single segment.
+
+2. **Do topic boundaries feel natural to a human reader?**
+   - **Embedding algorithm:** Yes, boundaries are more natural and align better with topic transitions in the conversation.
+   - **Baseline algorithm:** Boundaries are less natural, sometimes splitting topics mid-discussion or combining unrelated topics.
+
+3. **Which approach performs better and why?**
+   - **Embedding algorithm performs better** for the following reasons:
+     - **More natural boundaries:** Semantic embeddings capture meaning better than lexical similarity, resulting in boundaries that align with actual topic shifts
+     - **Better segmentation:** Produces more granular segments that capture individual topics/subtopics rather than grouping multiple topics together
+     - **More consistent:** Segment lengths are more uniform and appropriate for the content
+     - **More meaningful segments:** Each segment makes sense as a standalone unit, making it easier to understand the topic being discussed
+
+The embedding-based approach leverages semantic understanding, which is crucial for conversational transcripts where topics can shift subtly without obvious keyword changes.
+
+### Outputs
+
+**Complete outputs (segmented transcripts, keywords, and summaries) are available on Google Drive:**
+
+**Google Drive:** https://drive.google.com/drive/folders/1YopGLkQYHibzAyZu4P6VmW03x-z_RQPC?usp=sharing
+
+The folder contains:
+- `output_json_baseline/` - Baseline algorithm segments (346 JSON files)
+- `output_json_embedding/` - Embedding algorithm segments (346 JSON files)
+- `output_kws_summaries/json_updated/` - Segments with keywords and summaries (228 JSON files)
+
+**Local outputs (in repository):**
+- `segments_all_baseline.csv` - Combined baseline segments
+- `segments_all_embedding.csv` - Combined embedding segments
+- `comparison_outputs/` - Comparison results and visualizations
+
+### Keywords and Summaries
+
+**File:** `keywords_and_summaries.py`
+
+**Keywords Extraction:**
+- Method: TF-IDF vectorization
+- N-gram range: (1, 2) - captures single words and bigrams
+- Stopwords removed using NLTK English stopwords
+- Top-k keywords extracted per segment (default: 10)
+
+**Summaries Generation:**
+- Method: LLM-based summarization using T5-small model
+- Model: `t5-small` (local, offline)
+- Summary length: Adaptive (1-2 sentences, typically 10-80 tokens)
+- Format: Concise summaries capturing the main point of each segment
+
+**Output Format:**
+
+Each segment JSON file contains:
+```json
+{
+  "segment_id": 0,
+  "start_sentence": 0,
+  "end_sentence": 4,
+  "text": "Segment text...",
+  "num_words": 85,
+  "keywords": ["keyword1", "keyword2", ...],
+  "summary": "Short summary of the segment..."
+}
+```
+
+### Usage
+
+**Run Baseline Segmentation:**
+```bash
+python baseline_segmentation.py --input_csv lex_fridman_cleaned.csv --out_json_dir output_json_baseline --segments_csv segments_all_baseline.csv
+```
+
+**Run Embedding Segmentation:**
+```bash
+python embedding_segmentation.py --input_csv lex_fridman_cleaned.csv --out_json_dir output_json_embedding --segments_csv segments_all_embedding.csv
+```
+
+**Compare Algorithms:**
+```bash
+python compare_algorithms.py
+```
+
+**Extract Keywords and Summaries:**
+```bash
+python keywords_and_summaries.py --input_json_dir output_json_embedding --local_model_dir models/t5-small --top_k 10
+```
+
+
+
+
+
+
+
 
 ## Notes
 
 Due to the large size of the audio files, they are not stored directly in this GitHub repository.
 
-All processed episodes can be downloaded from the Google Drive link provided above. The dataset can also be regenerated locally using the provided scripts.
+All processed episodes can be downloaded from the Google Drive link provided above. The dataset can also be regenerated locally using the provided scripts. 
+
+Same is true for the output json embeddings too.
