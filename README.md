@@ -151,7 +151,8 @@ The following components have been completed:
 - Naming standardization
 - Manifest generation
 - Reproducible pipeline setup
-- Topic Segmentation, Keywords, and Summaries
+- **Week 3:** Topic Segmentation, Keywords, and Summaries
+- **Week 4:** User Interface and Transcript Navigation
 
 ## Week 3: Topic Segmentation and Analysis
 
@@ -304,12 +305,101 @@ python compare_algorithms.py
 python keywords_and_summaries.py --input_json_dir output_json_embedding --local_model_dir models/t5-small --top_k 10
 ```
 
+---
 
+## Week 4: User Interface and Transcript Navigation
 
+### Overview
 
+Week 4 focuses on building an interactive user interface that allows users to navigate podcast transcripts efficiently through topic-based segment jumping. This eliminates the need for endless scrolling or manual text searching.
 
+### Features Implemented
 
+**File:** `app.py` (Streamlit application)
 
+**Core Functionality:**
+
+1. **Episode Selection**
+   - Dropdown menu to select from 228 processed podcast episodes
+   - Displays episode title and metadata
+
+2. **Topic Segment Navigation**
+   - Displays all segments for the selected episode
+   - Each segment labeled with summary (truncated to 70 chars) or keywords
+   - Format: "Segment X: [summary/keywords]"
+
+3. **Segment Jumping**
+   - Click/select any segment from dropdown
+   - Instantly displays the full transcript text for that segment
+   - No scrolling required - direct access to topic content
+
+4. **Segment Metadata Display**
+   - Start/end sentence indices
+   - Word count
+   - Keywords (if available)
+   - Full transcript text in scrollable text area
+
+### User Interface Design
+
+**Layout:**
+- Wide layout for better readability
+- Three-column metadata display (start sentence, end sentence, word count)
+- Large text area (450px height) for transcript display
+- Clear visual hierarchy with separators
+
+**Segment Labels:**
+- Primary: Summary text (first 70 characters)
+- Fallback: Top 3 keywords if summary unavailable
+- Format: "Segment {id}: {label}"
+
+### How It Works
+
+1. **User selects episode** → System loads corresponding JSON file
+2. **System extracts segments** → Builds list of segment labels from summaries/keywords
+3. **User selects segment** → System retrieves segment text
+4. **System displays content** → Shows transcript text with metadata
+
+**Data Flow:**
+```
+JSON File (output_kws_summaries/json_updated/)
+    ↓
+Load episode data
+    ↓
+Extract segments array
+    ↓
+Build labels (summary/keywords)
+    ↓
+User selection
+    ↓
+Display segment.text
+```
+
+### Running the Application
+
+**Prerequisites:**
+```bash
+pip install streamlit
+```
+
+**Launch the app:**
+```bash
+streamlit run app.py
+```
+
+The application will open in your default browser at `http://localhost:8501`
+
+### Technical Implementation
+
+**Technology Stack:**
+- **Streamlit** - Interactive web application framework
+- **JSON** - Data storage format (from Week 3 outputs)
+- **Python** - Backend logic
+
+**Key Components:**
+- `@st.cache_data` - Caching for performance (episode file list)
+- `st.selectbox()` - Episode and segment selection widgets
+- `st.text_area()` - Transcript display with scrolling
+- `st.metric()` - Metadata visualization
 
 ## Notes
 
