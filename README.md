@@ -331,26 +331,13 @@ Week 4 focuses on building an interactive user interface that allows users to na
 3. **Segment Jumping**
    - Click/select any segment from dropdown
    - Instantly displays the full transcript text for that segment
-   - No scrolling required - direct access to topic content
+   - Direct access to topic content
 
 4. **Segment Metadata Display**
    - Start/end sentence indices
    - Word count
    - Keywords (if available)
    - Full transcript text in scrollable text area
-
-### User Interface Design
-
-**Layout:**
-- Wide layout for better readability
-- Three-column metadata display (start sentence, end sentence, word count)
-- Large text area (450px height) for transcript display
-- Clear visual hierarchy with separators
-
-**Segment Labels:**
-- Primary: Summary text (first 70 characters)
-- Fallback: Top 3 keywords if summary unavailable
-- Format: "Segment {id}: {label}"
 
 ### How It Works
 
