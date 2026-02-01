@@ -5,7 +5,7 @@ import streamlit as st
 # -----------------------------
 # CONFIG
 # -----------------------------
-DATA_DIR = "output_kws_summaries/json_updated"
+DATA_DIR = "output_kws_summaries/json_with_sentiment"
 
 st.set_page_config(
     page_title="Podcast Transcript Navigator",
@@ -123,3 +123,23 @@ st.text_area(
 )
 
 st.caption("⬆ Choose another segment from the dropdown to jump instantly.")
+
+# -----------------------------
+# SENTIMENT DISPLAY
+# -----------------------------
+sentiment_label = selected_segment.get("sentiment_label", "Unknown")
+sentiment_score = selected_segment.get("sentiment_score", 0.0)
+
+color_map = {
+    "Positive": "green",
+    "Neutral": "orange",
+    "Negative": "red"
+}
+
+st.markdown(
+    f"**Sentiment:** "
+    f"<span style='color:{color_map.get(sentiment_label, 'black')};"
+    f"font-weight:bold'>{sentiment_label}</span> "
+    f"(score: {sentiment_score:.2f})",
+    unsafe_allow_html=True
+)
