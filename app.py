@@ -1,3 +1,5 @@
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 import os
 import json
 import streamlit as st
@@ -46,6 +48,26 @@ def load_episode_titles(data_dir, files):
     return title_to_file
 
 title_to_file = load_episode_titles(DATA_DIR, episode_files)
+
+def render_keyword_cloud(keywords):
+    if not keywords:
+        st.info("No keywords available for this segment.")
+        return
+
+    # Assign equal weights (acceptable for Week 5)
+    freq = {kw: 1 for kw in keywords}
+
+    wc = WordCloud(
+        width=600,
+        height=300,
+        background_color="white"
+    ).generate_from_frequencies(freq)
+
+    fig, ax = plt.subplots()
+    ax.imshow(wc, interpolation="bilinear")
+    ax.axis("off")
+
+    st.pyplot(fig)
 
 # -----------------------------
 # EPISODE SELECTOR (TITLE-BASED)
@@ -115,6 +137,9 @@ if selected_segment.get("keywords"):
     st.markdown(
         "**Keywords:** " + ", ".join(selected_segment["keywords"])
     )
+    st.markdown("### ☁ Keyword Cloud")
+    render_keyword_cloud(selected_segment["keywords"])
+
 
 st.text_area(
     "Transcript Text",

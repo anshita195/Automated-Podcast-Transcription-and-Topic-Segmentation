@@ -13,3 +13,11 @@ output_kws_summaries/
 
 # Downloaded models
 models/
+
+app0.py
+app1.py
+app2.py
+app3.py
+app4.py
+app5.py
+app6.py
