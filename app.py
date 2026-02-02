@@ -1,8 +1,10 @@
-from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 import os
 import json
 import streamlit as st
+import pandas as pd
+import altair as alt
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 # -----------------------------
 # CONFIG
@@ -10,22 +12,25 @@ import streamlit as st
 DATA_DIR = "output_kws_summaries/json_with_sentiment"
 
 st.set_page_config(
-    page_title="Podcast Transcript Navigator",
+    page_title="Podcast Topic Timeline",
     layout="wide"
 )
 
-st.title("🎧 Podcast Transcript Navigation")
-st.caption("Select a topic to instantly jump to that part of the transcript")
+st.title("🎧 Podcast Topic Timeline")
+st.caption(
+    "Visual timeline of podcast topics. "
+    "Block width ∝ segment length (word count). "
+    "Color indicates sentiment."
+)
 
 # -----------------------------
 # LOAD EPISODE FILES
 # -----------------------------
 @st.cache_data
 def load_episode_files(data_dir):
-    return sorted([
-        f for f in os.listdir(data_dir)
-        if f.endswith(".json")
-    ])
+    return sorted(
+        [f for f in os.listdir(data_dir) if f.endswith(".json")]
+    )
 
 episode_files = load_episode_files(DATA_DIR)
 
@@ -38,25 +43,137 @@ if not episode_files:
 # -----------------------------
 @st.cache_data
 def load_episode_titles(data_dir, files):
-    title_to_file = {}
+    mapping = {}
     for fname in files:
-        path = os.path.join(data_dir, fname)
-        with open(path, "r", encoding="utf-8") as f:
+        with open(os.path.join(data_dir, fname), "r", encoding="utf-8") as f:
             data = json.load(f)
             title = data.get("title", fname)
-            title_to_file[title] = fname
-    return title_to_file
+            mapping[title] = fname
+    return mapping
 
 title_to_file = load_episode_titles(DATA_DIR, episode_files)
 
-def render_keyword_cloud(keywords):
-    if not keywords:
-        st.info("No keywords available for this segment.")
-        return
+# -----------------------------
+# EPISODE SELECTOR
+# -----------------------------
+selected_title = st.selectbox(
+    "🎙️ Select Podcast Episode",
+    options=list(title_to_file.keys())
+)
 
-    # Assign equal weights (acceptable for Week 5)
+episode_path = os.path.join(DATA_DIR, title_to_file[selected_title])
+with open(episode_path, "r", encoding="utf-8") as f:
+    episode_data = json.load(f)
+
+segments = episode_data.get("segments", [])
+
+if not segments:
+    st.warning("No segments found for this episode.")
+    st.stop()
+
+st.markdown(f"### {episode_data.get('title', 'Unknown Episode')}")
+st.markdown("---")
+
+# ============================================================
+# 🧭 VISUAL TIMELINE (CORE WEEK 5 FEATURE)
+# ============================================================
+
+timeline_rows = []
+cursor = 0
+
+for seg in segments:
+    timeline_rows.append({
+        "segment_id": f"S{seg['segment_id']}",
+        "start": cursor,
+        "end": cursor + seg["num_words"],
+        "sentiment": seg.get("sentiment_label", "Neutral"),
+        "summary": seg.get("summary", "")
+    })
+    cursor += seg["num_words"]
+
+df_timeline = pd.DataFrame(timeline_rows)
+
+color_scale = alt.Scale(
+    domain=["Positive", "Neutral", "Negative"],
+    range=["#4CAF50", "#FFC107", "#F44336"]
+)
+
+timeline_chart = (
+    alt.Chart(df_timeline)
+    .mark_bar(height=30)
+    .encode(
+        x=alt.X(
+            "start:Q",
+            title="Podcast Progress (word-based)",
+            axis=alt.Axis(grid=False)
+        ),
+        x2="end:Q",
+        y=alt.value(0),
+        color=alt.Color(
+            "sentiment:N",
+            scale=color_scale,
+            legend=alt.Legend(title="Sentiment")
+        ),
+        tooltip=[
+            alt.Tooltip("segment_id:N", title="Segment"),
+            alt.Tooltip("sentiment:N", title="Sentiment"),
+            alt.Tooltip("summary:N", title="Summary")
+        ],
+    )
+    .properties(height=80)
+)
+
+st.altair_chart(timeline_chart, use_container_width=True)
+st.markdown("---")
+
+# ============================================================
+# SEGMENT SELECTION (INTERACTION)
+# ============================================================
+
+def build_segment_label(seg):
+    summary = seg.get("summary", "").strip()
+    if summary:
+        return f"S{seg['segment_id']}: {summary[:70]}..."
+    return f"S{seg['segment_id']}"
+
+labels = [build_segment_label(s) for s in segments]
+
+selected_index = st.selectbox(
+    "📌 Select Topic Segment",
+    options=list(range(len(labels))),
+    format_func=lambda i: labels[i]
+)
+
+selected_segment = segments[selected_index]
+
+# ============================================================
+# SEGMENT DETAILS DISPLAY
+# ============================================================
+
+st.markdown("---")
+st.subheader(f"📄 Segment {selected_segment['segment_id']}")
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Start sentence", selected_segment["start_sentence"])
+col2.metric("End sentence", selected_segment["end_sentence"])
+col3.metric("Word count", selected_segment["num_words"])
+
+# -----------------------------
+# SUMMARY (POLISHED DISPLAY)
+# -----------------------------
+st.markdown("### 📝 Summary")
+st.write(selected_segment.get("summary", "No summary available."))
+
+# -----------------------------
+# KEYWORDS + WORD CLOUD
+# -----------------------------
+st.markdown("### 🔑 Keywords")
+
+keywords = selected_segment.get("keywords", [])
+if keywords:
+    st.write(", ".join(keywords))
+
     freq = {kw: 1 for kw in keywords}
-
     wc = WordCloud(
         width=600,
         height=300,
@@ -66,92 +183,15 @@ def render_keyword_cloud(keywords):
     fig, ax = plt.subplots()
     ax.imshow(wc, interpolation="bilinear")
     ax.axis("off")
-
     st.pyplot(fig)
+else:
+    st.info("No keywords available.")
 
 # -----------------------------
-# EPISODE SELECTOR (TITLE-BASED)
+# SENTIMENT
 # -----------------------------
-selected_title = st.selectbox(
-    "🎙️ Select Podcast Episode",
-    options=list(title_to_file.keys())
-)
+st.markdown("### 😊 Sentiment")
 
-episode_file = title_to_file[selected_title]
-episode_path = os.path.join(DATA_DIR, episode_file)
-
-with open(episode_path, "r", encoding="utf-8") as f:
-    episode_data = json.load(f)
-
-segments = episode_data.get("segments", [])
-title = episode_data.get("title", "Unknown Episode")
-
-st.markdown(f"### {title}")
-st.markdown("---")
-
-if not segments:
-    st.warning("No segments found for this episode.")
-    st.stop()
-
-# -----------------------------
-# BUILD SEGMENT LABELS
-# -----------------------------
-def build_segment_label(seg):
-    summary = seg.get("summary", "").strip()
-    keywords = seg.get("keywords", [])
-
-    if summary:
-        label = summary[:70] + ("..." if len(summary) > 70 else "")
-    elif keywords:
-        label = ", ".join(keywords[:3])
-    else:
-        label = f"Segment {seg['segment_id']}"
-
-    return f"Segment {seg['segment_id']}: {label}"
-
-labels = [build_segment_label(s) for s in segments]
-
-# -----------------------------
-# SEGMENT DROPDOWN
-# -----------------------------
-selected_index = st.selectbox(
-    "📌 Select Topic Segment",
-    options=list(range(len(labels))),
-    format_func=lambda i: labels[i]
-)
-
-selected_segment = segments[selected_index]
-
-# -----------------------------
-# DISPLAY SELECTED SEGMENT
-# -----------------------------
-st.markdown("---")
-st.subheader(f"📄 Segment {selected_segment['segment_id']}")
-
-meta1, meta2, meta3 = st.columns(3)
-meta1.metric("Start sentence", selected_segment["start_sentence"])
-meta2.metric("End sentence", selected_segment["end_sentence"])
-meta3.metric("Word count", selected_segment["num_words"])
-
-if selected_segment.get("keywords"):
-    st.markdown(
-        "**Keywords:** " + ", ".join(selected_segment["keywords"])
-    )
-    st.markdown("### ☁ Keyword Cloud")
-    render_keyword_cloud(selected_segment["keywords"])
-
-
-st.text_area(
-    "Transcript Text",
-    selected_segment["text"],
-    height=450
-)
-
-st.caption("⬆ Choose another segment from the dropdown to jump instantly.")
-
-# -----------------------------
-# SENTIMENT DISPLAY
-# -----------------------------
 sentiment_label = selected_segment.get("sentiment_label", "Unknown")
 sentiment_score = selected_segment.get("sentiment_score", 0.0)
 
@@ -162,9 +202,23 @@ color_map = {
 }
 
 st.markdown(
-    f"**Sentiment:** "
     f"<span style='color:{color_map.get(sentiment_label, 'black')};"
-    f"font-weight:bold'>{sentiment_label}</span> "
+    f"font-weight:bold'>"
+    f"{sentiment_label}</span> "
     f"(score: {sentiment_score:.2f})",
     unsafe_allow_html=True
+)
+
+# -----------------------------
+# TRANSCRIPT
+# -----------------------------
+st.markdown("### 📜 Transcript Text")
+st.text_area(
+    "",
+    selected_segment["text"],
+    height=400
+)
+
+st.caption(
+    "Use the timeline for overview and the dropdown for precise navigation."
 )
