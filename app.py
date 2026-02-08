@@ -90,7 +90,7 @@ def load_episode_titles(data_dir, files):
     return mapping
 
 
-episode_files = load_episode_files(DATA_DIR)
+episode_files = load_episode_files(DATA_DIR)[:10]
 if not episode_files:
     st.error("No episode JSON files found.")
     st.stop()
