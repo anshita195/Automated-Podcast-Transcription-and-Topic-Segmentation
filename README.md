@@ -548,23 +548,28 @@ Based on the combined testing data, the following patterns have emerged that req
 
 ---
 
-## 5. Iteration Plan (Week 6 Fixes)
-In accordance with Week 6 guidelines, no new models will be trained. The following code-level improvements will be implemented to address the feedback above.
+## 5. Implementation of Week 6 Fixes (Completed)
+In accordance with Week 6 guidelines, no new models were trained and no JSON data was regenerated. The following code-level improvements have been successfully implemented in `app.py` to address user feedback.
 
-### Priority 1: UI & Navigation Improvements
-- [ ] **Add Navigation Buttons:** Implement `st.button("Next")` and `st.button("Previous")` to allow users to read through segments without opening the dropdown list.
+### 1: UI & Navigation Improvements 
+* **Next / Previous Buttons:** Implemented `st.button("Next")` and `st.button("Previous")` to allow users to navigate segments sequentially without repeatedly opening the dropdown list.
+* **State Management:** Utilized `st.session_state` to ensure safe and smooth transitions between segments.
 
-### Priority 2: Data Cleaning (Post-Processing)
-- [ ] **Filter Micro-Segments:** Update `app.py` to hide or merge any segment containing fewer than 15 words. This will reduce the "Barcode" effect and remove "empty" segments.
-- [ ] **Refine Keyword Exclusion:** Update the `STOP_WORDS` list in the extraction function to explicitly include common conversational fillers detected during testing: `['yeah', 'oh', 'okay', 'right', 'know', 'thing', 'et', 'cetera']`.
+### s2: Data Cleaning & Post-Processing 
+* **Micro-Segment Filter:** Added logic to hide or merge any segment containing fewer than **15 words**, significantly reducing the "Barcode" effect and removing empty/low-value data points.
+* **Keyword Exclusion:** Updated the `STOP_WORDS` list during display time to explicitly remove common conversational fillers detected during testing:
+    > `['yeah', 'oh', 'okay', 'right', 'know', 'thing', 'et', 'cetera']`
 
-### Priority 3: Content Presentation
-- [ ] **Summary Truncation:** Implement a check: if a summary contains the same 3-word phrase more than twice (repetition loop), display the raw transcript text for that segment instead.
+### 3: Content Presentation 
+* **Summary Repetition Detection:** Implemented a validation check for summary loops.
+    * *Logic:* If a 3-word phrase repeats more than 2 times in a summary, the system automatically falls back to displaying the **raw transcript** for that segment instead.
+* **Formatting:** Standardized headings and spacing for a cleaner reading experience.
 
 ---
 
 ## Conclusion
-The system has passed the **"Validation"** phase. While the core NLP is strong, the User Experience needs the specific refinements listed above to be considered "release ready." These changes will be implemented and verified before the final project submission.
+The system has passed the **"Validation"** phase. The User Experience friction points identified during testing have been resolved via the Week 6 code updates listed above.
+
 
 ## Notes
 
