@@ -51,7 +51,7 @@ graph LR
     A[Audio Input] --> B[Preprocessing]
     B --> C[Whisper AI Transcription]
     C --> D[Embedding-Based Segmentation]
-    D --> E[Summarization using T5, Keywords (TF-IDF), Sentiment(VADER)]
+    D --> E[Summarization]
     E --> F[Streamlit UI]
 
 ```
@@ -59,7 +59,7 @@ graph LR
 1. **Audio Preprocessing:** Audio standardization (16 kHz mono, 16-bit PCM), denoising, loudness normalization, silence trimming, and metadata-aware chunking (`audio_preprocessing.py`).
 2. **Transcription:** Generating timestamped text (`transcription_generation.py`).
 3. **Segmentation:** Semantic similarity analysis (`embedding_segmentation.py`).
-4. **Enrichment:** Summarization (T5), Keywords (TF-IDF), and Sentiment (VADER).
+4. **Summarization:** Summarization (T5), Keywords (TF-IDF), and Sentiment (VADER).
 5. **Visualization:** Interactive Timeline and Keyword Clouds (`app.py`).
 
 ---
