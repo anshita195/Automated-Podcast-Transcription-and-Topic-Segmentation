@@ -25,3 +25,9 @@ models/
 app_alt.py
 app_alt_alt.py
 app_alt2.py
+
+app_alt.py
+parquet_to_csv.py
+lex_fridman_cleaned.csv
+segments_all_baseline.csv
+segments_all_embedding.csv
