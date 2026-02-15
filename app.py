@@ -458,8 +458,30 @@ def main():
     else:
         st.write(summary_text)
 
+    # --- UPDATED TRANSCRIPT SECTION WITH VISUAL HIGHLIGHTING ---
     st.markdown("### Transcript")
-    st.text_area("", value=seg.get("text", ""), height=350)
+    
+    # Get the text
+    transcript_text = seg.get("text", "")
+    
+    # Apply Highlighting if search is active
+    if search_query:
+        # Use Regex to replace "word" with "<mark>word</mark>" (Yellow Highlight)
+        # re.IGNORECASE makes it find "Quantum" even if you typed "quantum"
+        # We escape search_query to safely handle special chars
+        # We use a lambda to preserve the original casing of the matched text
+        pattern = re.compile(re.escape(search_query), re.IGNORECASE)
+        transcript_text = pattern.sub(lambda m: f"<mark>{m.group(0)}</mark>", transcript_text)
+
+    # Render as Scrollable Markdown (looks like a text box but supports colors)
+    st.markdown(
+        f"""
+        <div style="height: 350px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; border-radius: 5px; background-color: #f0f2f6;">
+            {transcript_text}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 if __name__ == "__main__":
     main()
