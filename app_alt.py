@@ -1,6 +1,7 @@
 import os
 import json
 from pathlib import Path
+from collections import Counter
 
 import streamlit as st
 import numpy as np
@@ -20,6 +21,18 @@ from keywords_and_summaries import (
     summarize_t5,
 )
 from add_sentiment import get_sentiment
+
+
+def summary_has_repetition(summary: str) -> bool:
+    """Check if the summary has repeating trigrams (looping error)."""
+    if not summary:
+        return False
+    words = summary.lower().split()
+    trigrams = [" ".join(words[i : i + 3]) for i in range(len(words) - 2)]
+    if not trigrams:
+        return False
+    counts = Counter(trigrams)
+    return any(v > 2 for v in counts.values())
 
 
 # =======================
@@ -428,8 +441,15 @@ def main():
     # Navigation + segment exploration (similar style to app.py)
     st.markdown("### Explore Segments")
 
+    # Micro-segment filtering: hide segments < 15 words (Week 6)
+    display_segments = [s for s in segments if s.get("num_words", 0) >= 15]
+    if not display_segments:
+        st.warning("No segments long enough to display.")
+        return
+
     if "seg_index" not in st.session_state:
         st.session_state.seg_index = 0
+    st.session_state.seg_index = min(st.session_state.seg_index, len(display_segments) - 1)
 
     c1, c2, c3 = st.columns([1, 2, 1])
 
@@ -438,12 +458,12 @@ def main():
             st.session_state.seg_index -= 1
 
     with c3:
-        if st.button("Next ➡") and st.session_state.seg_index < len(segments) - 1:
+        if st.button("Next ➡") and st.session_state.seg_index < len(display_segments) - 1:
             st.session_state.seg_index += 1
 
     labels = [
         f"S{seg['segment_id']}: {seg.get('title','Segment')[:70]}"
-        for seg in segments
+        for seg in display_segments
     ]
 
     st.session_state.seg_index = st.selectbox(
@@ -453,7 +473,7 @@ def main():
         format_func=lambda i: labels[i],
     )
 
-    seg = segments[st.session_state.seg_index]
+    seg = display_segments[st.session_state.seg_index]
 
     st.subheader(f"Segment {seg['segment_id']:02d} – {seg.get('title', '')}")
 
@@ -477,9 +497,14 @@ def main():
     else:
         st.info("No meaningful keywords.")
 
-    # Summary
+    # Summary (with repetition detection — Week 6)
     st.markdown("### Summary")
-    st.write(seg.get("summary", ""))
+    summary_text = seg.get("summary", "")
+    if summary_has_repetition(summary_text):
+        st.warning("⚠️ Model loop detected in summary. Displaying raw text excerpt instead.")
+        st.write(seg.get("text", "")[:300] + "...")
+    else:
+        st.write(summary_text)
 
     # Transcript text
     st.markdown("### Transcript")

@@ -22,13 +22,6 @@ audio_chunks/
 # Downloaded models
 models/
 
-app0.py
-app1.py
-app2.py
-app3.py
-app4.py
-app5.py
-app6.py
-app00.py
-app7.py
-app000.py
+app_alt.py
+app_alt_alt.py
+app_alt2.py
