@@ -51,7 +51,7 @@ graph LR
     A[Audio Input] --> B[Preprocessing]
     B --> C[Whisper AI Transcription]
     C --> D[Embedding-Based Segmentation]
-    D --> E[Enrichment]
+    D --> E[Summarization using T5, Keywords (TF-IDF), Sentiment(VADER)]
     E --> F[Streamlit UI]
 
 ```
