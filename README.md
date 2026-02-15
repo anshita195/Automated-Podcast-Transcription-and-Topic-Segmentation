@@ -102,7 +102,7 @@ While Generative LLMs (like GPT-4 or Gemini) can perform topic segmentation, we 
 
 ---
 
-## 6. Testing and Feedback (Week 6 Summary)
+## 6. Testing and Feedback 
 
 The system was tested against **10 podcast episodes** (varying in length, topic, and speaker style) and feedback was collected from **three external users**.
 
@@ -185,9 +185,9 @@ Based on the combined testing data, the following patterns have emerged that req
 * **Summary Loops:** The model occasionally gets stuck repeating phrases ("et cetera").
 * **Keywords:** Stop words like "yeah", "oh", and "thing" are appearing in word clouds.
 
-### Implementation of Week 6 Fixes (Completed)
+### Implementation of Fixes (Completed)
 
-In accordance with Week 6 guidelines, no new models were trained and no JSON data was regenerated. The following code-level improvements have been successfully implemented in `app.py` to address user feedback.
+The following code-level improvements have been successfully implemented in `app.py` to address user feedback.
 
 #### 1: UI & Navigation Improvements
 
@@ -242,13 +242,18 @@ In accordance with Week 6 guidelines, no new models were trained and no JSON dat
 
 ## 10. Repository Structure
 
-* `app.py`: The main **Streamlit User Interface**. Handles visualization, search, and interaction.
-* `run_pipeline.py`: **Headless Batch Processor**. Allows processing of entire folders of audio without the UI.
-* `audio_preprocessing.py`: Handles noise reduction and format conversion.
-* `transcription_generation.py`: Wrapper for the Whisper model.
-* `embedding_segmentation.py`: Core logic for semantic segmentation.
-* `keywords_and_summaries.py`: NLP enrichment modules.
-* `requirements.txt`: List of dependencies.
+Tracked (source) files:
+
+* `app.py`: The main **Streamlit User Interface**. Handles upload, preprocessing, transcription, segmentation, and interactive timeline.
+* `run_pipeline.py`: **Headless batch processor**. Processes all audio in `audio_input/` without the UI.
+* `audio_preprocessing.py`: Audio standardization, denoising, chunking.
+* `transcription_generation.py`: Whisper-based transcription.
+* `embedding_segmentation.py`: Semantic (embedding-based) segmentation.
+* `keywords_and_summaries.py`: TF-IDF keywords and T5 summarization.
+* `add_sentiment.py`: VADER sentiment per segment.
+* `requirements.txt`: Python dependencies.
+
+Folders such as `audio_input/`, `audio_processed/`, `audio_chunks/`, `transcripts/`, and `segments_runtime/` are **created automatically** on first run (or when you add audio and run the app or pipeline). You do not need to create them manually.
 
 ---
 
@@ -258,20 +263,44 @@ In accordance with Week 6 guidelines, no new models were trained and no JSON dat
 
 ```bash
 pip install -r requirements.txt
-
 ```
 
-**2. Run the User Interface**
+**2. Download the T5 model (required for summaries)**
+
+The app uses [T5-small](https://huggingface.co/google-t5/t5-small) for segment summarization and loads it from disk (no API key). After cloning the repo:
+
+1. Create a `models` folder in the project root.
+2. Download the model into `models/t5-small` using either method below.
+
+**Option A – Hugging Face CLI (recommended):**
+
+```bash
+pip install huggingface_hub
+huggingface-cli download google-t5/t5-small --local-dir models/t5-small
+```
+
+**Option B – Manual:** From [https://huggingface.co/google-t5/t5-small](https://huggingface.co/google-t5/t5-small), download all model files (e.g. `config.json`, `pytorch_model.bin`, tokenizer files) and place them in `models/t5-small/`.
+
+**3. (Optional) NLTK data**
+
+For keywords and sentiment, ensure NLTK data is present:
+
+```bash
+python -c "import nltk; nltk.download('punkt'); nltk.download('vader_lexicon')"
+```
+
+**4. Run the User Interface**
 
 ```bash
 streamlit run app.py
-
 ```
 
-**3. Run Batch Processing (Optional)**
-To process audio files in the background without the UI:
+Place audio files (e.g. `.mp3`, `.wav`) in `audio_input/` or upload them in the app. The pipeline will create `audio_processed/`, `audio_chunks/`, `transcripts/`, and `segments_runtime/` as needed.
+
+**5. Run batch processing (no UI)**
+
+To process every file in `audio_input/` without opening the app:
 
 ```bash
 python run_pipeline.py
-
 ```
