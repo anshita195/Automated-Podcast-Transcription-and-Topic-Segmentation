@@ -348,9 +348,9 @@ def build_segments_from_json(json_transcript_path_str: str):
 
 
 def main():
-    st.set_page_config(page_title="Podcast Navigator (Alt)", layout="wide")
-    st.title("🎧 Podcast Pipeline Demo (Alt UI)")
-    st.caption("Upload an audio file → preprocess → transcribe → segment → keywords, titles, sentiment → navigate by segments.")
+    st.set_page_config(page_title="Automated Podcast Transcription and Topic Segmentation", layout="wide")
+    st.title("Automated Podcast Transcription and Topic Segmentation")
+    st.caption("Upload an audio file → preprocessing → transcription → segmentation → keywords, summaries, sentiment → navigate by segments.")
 
     uploaded = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
     if not uploaded:
@@ -422,7 +422,7 @@ def main():
     st.success(f"Ready with {len(segments)} segments for this episode.")
 
     # Timeline + segment selection
-    st.markdown("### Segment Timeline")
+    st.markdown("### Timeline")
     render_timeline(segments, total_duration or (segments[-1]["end_time"] if segments else 0.0))
 
     # Navigation + segment exploration (similar style to app.py)
@@ -447,7 +447,7 @@ def main():
     ]
 
     st.session_state.seg_index = st.selectbox(
-        "📌 Jump to Segment",
+        "Select Segment",
         range(len(labels)),
         index=st.session_state.seg_index,
         format_func=lambda i: labels[i],
@@ -469,7 +469,7 @@ def main():
     st.markdown(f"**Sentiment:** {label} (score: {score:.3f})")
 
     # Keywords + cloud
-    st.markdown("### 🔑 Keywords")
+    st.markdown("###  Keywords")
     keywords = clean_keywords_for_display(seg.get("keywords", []))
     if keywords:
         st.write(", ".join(keywords))
@@ -478,11 +478,11 @@ def main():
         st.info("No meaningful keywords.")
 
     # Summary
-    st.markdown("### 📝 Summary")
+    st.markdown("### Summary")
     st.write(seg.get("summary", ""))
 
     # Transcript text
-    st.markdown("### 📜 Transcript")
+    st.markdown("### Transcript")
     st.text_area(
         label="",
         value=seg.get("text", ""),
