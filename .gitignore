@@ -6,10 +6,18 @@ episodes/
 *.ytdl
 *.wav
 
+__pycache__/
+.streamlit/
+
 # Large output directories (hundreds of JSON files, too large for git)
 output_json_baseline/
 output_json_embedding/
 output_kws_summaries/
+transcripts/
+segments_runtime/
+audio_processed/
+audio_input/
+audio_chunks/
 
 # Downloaded models
 models/

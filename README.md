@@ -575,6 +575,6 @@ The system has passed the **"Validation"** phase. The User Experience friction p
 
 Due to the large size of the audio files, they are not stored directly in this GitHub repository.
 
-All processed episodes can be downloaded from the Google Drive link provided above. The dataset can also be regenerated locally using the provided scripts. 
+All processed episodes can be downloaded from the Google Drive link provided above. The dataset can also be regenerated locally using the provided scripts.
 
 Same is true for the output json embeddings too.

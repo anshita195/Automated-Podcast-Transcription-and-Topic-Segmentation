@@ -50,27 +50,41 @@ def get_sentiment(text):
     return compound, label
 
 # -----------------------------
-# Main processing
+# Main processing (CLI use only)
 # -----------------------------
-json_files = sorted(glob(os.path.join(INPUT_DIR, "*.json")))
-print(f"Found {len(json_files)} files")
+def main():
+    """
+    Batch-add sentiment to all JSON files in INPUT_DIR and
+    write updated files to OUTPUT_DIR.
 
-for path in tqdm(json_files, desc="Adding sentiment"):
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    This is intentionally only called when running this file
+    as a script (python add_sentiment.py), so that importing
+    get_sentiment from other modules does not trigger a
+    long-running batch job.
+    """
+    json_files = sorted(glob(os.path.join(INPUT_DIR, "*.json")))
+    print(f"Found {len(json_files)} files")
 
-    segments = data.get("segments", [])
+    for path in tqdm(json_files, desc="Adding sentiment"):
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-    for seg in segments:
-        text = seg.get("text", "")
-        score, label = get_sentiment(text)
+        segments = data.get("segments", [])
 
-        seg["sentiment_score"] = score
-        seg["sentiment_label"] = label
+        for seg in segments:
+            text = seg.get("text", "")
+            score, label = get_sentiment(text)
 
-    out_path = os.path.join(OUTPUT_DIR, os.path.basename(path))
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+            seg["sentiment_score"] = score
+            seg["sentiment_label"] = label
 
-print("✅ Sentiment added successfully.")
-print("Output directory:", OUTPUT_DIR)
+        out_path = os.path.join(OUTPUT_DIR, os.path.basename(path))
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    print("✅ Sentiment added successfully.")
+    print("Output directory:", OUTPUT_DIR)
+
+
+if __name__ == "__main__":
+    main()
