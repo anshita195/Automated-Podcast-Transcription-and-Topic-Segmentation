@@ -2,9 +2,9 @@
 
 ## 1. Project Overview
 
-This project addresses the challenge of navigating long-form audio content. Podcasts often exceed 60 minutes, making it difficult for listeners to locate specific topics without listening to the entire episode.
+This project solves the problem of navigating long audio content. Podcasts often exceed 60 minutes, making it difficult for listeners to find specific topics without listening to the entire episode.
 
-We developed an AI-powered pipeline that automatically transcribes audio, segments it into coherent semantic topics using embedding-based similarity, and provides efficient navigation.
+We developed an AI-powered pipeline that automatically transcribes audio, segments it into coherent topics, and provides efficient navigation.
 
 **Key Objectives:**
 
@@ -12,19 +12,24 @@ We developed an AI-powered pipeline that automatically transcribes audio, segmen
 * **Segmentation:** Automatically detect topic shifts using semantic embeddings (SentenceTransformers) rather than simple keyword matching.
 * **Navigation:** Build a searchable, interactive UI to jump to specific topics immediately.
 
+**Significance and Real-World Applications:**
+
+* **Accessibility:** Provides a bridge for individuals with hearing impairments by offering accurate, timestamped transcripts. Topic segmentation further aids neurodiverse users (e.g., ADHD) by breaking overwhelming audio into manageable, structured chunks.
+* **Media & Content:** Allows journalists and content creators to rapidly search through hours of interview footage to find specific quotes or snippets without manual work.
+
 ---
 
 ## 2. Dataset Description
 
-The system was developed and validated using a diverse collection of **16 podcast episodes**, categorized by length and complexity to ensure robust testing:
+The system was developed and validated using a diverse collection of **16 podcast episodes**:
 
-* **Long-Form Validation Set (10 Episodes):** Used for the Week 6 System Testing and Loop/Segmentation validation.
+* **Long Audio (10 Episodes):** Used for System Testing and validation.
 * **9 Episodes** of the *Lex Fridman Podcast* (Deep technical/philosophical conversations, 2–3 hours each).
 * **1 Episode** of *BBC Global News* (Rapid topic switching, ~30 mins).
 
 
 * **Short-Form Dev Set (6 Episodes):**
-* **6 Episodes** of *The Habit Coach Podcast* (5–10 mins each). Used for rapid prototyping and unit testing during initial development.
+* **6 Episodes** of *The Habit Coach Podcast* (5–10 mins each). Used during initial development.
 
 
 
@@ -38,7 +43,7 @@ Due to the large size of the processed audio files, they are not hosted directly
 * **Audio Chunks:** [Google Drive Link](https://drive.google.com/drive/folders/1o-2Ps9UwJk39pFwEdEtNNszfdX9z6gOJ)
 * **Processed Transcripts (JSON):** [Google Drive Link](https://drive.google.com/drive/folders/1AwbyNo-0rXBFFYLJPs0wF2AJkuDZ8P18)
 * **Segments Produced (JSON):** [Google Drive Link](https://drive.google.com/drive/folders/1wBGhUjAVtQNNglZnRAX9rDo9spFIWDAv)
-* **Model used for summary generation:** [Google Drive Link](https://drive.google.com/drive/folders/1HUyFz0Gtw5NsHhzqrWJ3PgXWTa4ptELj)
+* **Model used for summary generation:** [Hugging Face Link](https://huggingface.co/google-t5/t5-small)
 
 ---
 
@@ -56,7 +61,7 @@ graph LR
 
 ```
 
-1. **Audio Preprocessing:** Audio standardization (16 kHz mono, 16-bit PCM), denoising, loudness normalization, silence trimming, and metadata-aware chunking (`audio_preprocessing.py`).
+1. **Audio Preprocessing:** Audio standardization, denoising, loudness normalization, silence trimming, and chunking (`audio_preprocessing.py`).
 2. **Transcription:** Generating timestamped text (`transcription_generation.py`).
 3. **Segmentation:** Semantic similarity analysis (`embedding_segmentation.py`).
 4. **Summarization:** Summarization (T5), Keywords (TF-IDF), and Sentiment (VADER).
@@ -67,10 +72,10 @@ graph LR
 ## 4. Tools and Libraries Used
 
 * **Audio Processing:** `LibROSA` (Loading/Conversion), `Pydub` (Chunking).
-* **Speech-to-Text:** `OpenAI Whisper` (Base model) for high-accuracy transcription with timestamps.
-* **NLP & Segmentation:** `SentenceTransformers` (all-MiniLM-L6-v2) for semantic vectorization; `scikit-learn` for Cosine Similarity.
+* **Speech-to-Text:** `OpenAI Whisper` (Base model).
+* **NLP & Segmentation:** `SentenceTransformers` (all-MiniLM-L6-v2) for vectorization; `scikit-learn` for Cosine Similarity.
 * **Summarization:** `HuggingFace Transformers` (T5-small).
-* **Sentiment Analysis:** `VADER Sentiment` (NLTK) for polarity scoring.
+* **Sentiment Analysis:** `VADER Sentiment` (NLTK) for sentiment scoring.
 * **User Interface:** `Streamlit` (Web App), `Altair` (Timeline), `WordCloud`.
 
 ---
@@ -79,21 +84,20 @@ graph LR
 
 ### A. Transcription
 
-We utilized the **Whisper Base** model. The audio is processed in 10-minute chunks to manage memory usage, with results stitched back together to form a cohesive JSON transcript containing start/end timestamps for every text segment.
+We used the **Whisper Base** model. The audio is processed in 10-minute chunks to manage memory usage, with results used back together to form a cohesive JSON transcript containing start/end timestamps for every text segment.
 
 ### B. Topic Segmentation (Algorithm Comparison)
 
 We explored multiple methods to identify topic boundaries:
 
 1. **Baseline Approach (TF-IDF):** Attempted to find boundaries based on keyword frequency changes. **Result:** Failed to detect topic shifts when vocabulary changed but context remained similar.
-2. **Final Approach (Embeddings):** We implemented a sliding window approach using `all-MiniLM-L6-v2`. We calculated the **Cosine Similarity** between consecutive sentence groups. "Valleys" (drops) in similarity scores indicated a semantic shift (topic change). This method proved significantly more robust for conversational audio.
+2. **Final Approach (Embeddings):** We implemented a sliding window approach using `all-MiniLM-L6-v2`. We calculated the **Cosine Similarity** between consecutive sentence groups. This method proved significantly better.
 
 **Design Decision: Why Embeddings over LLMs?**
 While Generative LLMs (like GPT-4 or Gemini) can perform topic segmentation, we explicitly chose the **Embedding-based approach** for specific engineering reasons:
 
-* **Cost Efficiency:** LLM-based segmentation requires massive token usage, leading to high API costs or the need for expensive high-VRAM GPUs (e.g., A100s) for local inference.
-* **Latency:** Processing a 3-hour podcast via an LLM is slow. Our embedding approach runs locally on standard hardware (CPU/T4 GPU) in seconds.
-* **Sustainability:** This approach makes the software accessible to users without requiring paid API keys or enterprise-grade hardware.
+* **Cost Efficiency:** LLM-based segmentation requires massive token usage, leading to high costs.
+* **Latency:** Processing a 3-hour podcast via an LLM is slow. Our embedding approach runs locally on standard hardware (CPU/T4 GPU).
 
 ### C. Summarization & Keyword Extraction
 
@@ -108,7 +112,7 @@ The system was tested against **10 podcast episodes** (varying in length, topic,
 
 ### Internal System Testing Log
 
-* **Tester:** Developer (Self-Testing)
+* **Tester:** Self-Testing
 * **Scope:** 10 Episodes (~20 hours of audio data)
 * **Focus:** Transcription accuracy, segmentation logic, and UI stability.
 <!-- 
@@ -140,11 +144,11 @@ The system was tested against **10 podcast episodes** (varying in length, topic,
 
 ### User Feedback Collection
 
-**Methodology:** Feedback was taken from 3 External Users.
+Feedback was taken from 3 External Users.
 
 #### User 1: Ayush (Friend)
 
-* **Positive:** "The Visual Timeline is the best part. I immediately understood the 'emotional arc' of the episode."
+* **Positive:** "The Visual Timeline is the best part. I immediately understood the emotional arc of the episode."
 * **Critical Feedback:**
 * **The Disconnect:** Attempted to click the bars on the chart to filter data, but nothing happened. Found it frustrating to match Segment IDs manually.
 * **Dropdown:** The list is too long to scroll through.
@@ -177,7 +181,7 @@ Based on the combined testing data, the following patterns have emerged that req
 **A. Navigation Friction**
 
 * **Observation:** Users expect the Altair chart to be clickable. When it isn't, they are forced to use the dropdown, which is overwhelming for long episodes (200+ items).
-* **Decision:** Implementing full Altair interactivity is complex, but adding "Next Segment" / "Previous Segment" buttons is a high-value, low-effort fix to improve flow.
+* **Decision:** Implementing full Altair interactivity is complex, but adding "Next Segment" / "Previous Segment" buttons is a low-effort fix to improve flow.
 
 **B. Content Noise (Glitches)**
 
@@ -192,68 +196,71 @@ The following code-level improvements have been successfully implemented in `app
 #### 1: UI & Navigation Improvements
 
 * **Next / Previous Buttons:** Implemented `st.button("Next")` and `st.button("Previous")` to allow users to navigate segments sequentially without repeatedly opening the dropdown list.
-* **State Management:** Utilized `st.session_state` to ensure safe and smooth transitions between segments.
 
 #### 2: Data Cleaning & Post-Processing
 
 * **Implemented Micro-Segment Filtering for Navigation:**
 * **Issue Identified:** Users found it frustrating to navigate through short, non-substantive segments (e.g., 'Yeah', 'Okay') using the 'Next' button or Dropdown.
 * **Corrective Action:** Implemented a filter that excludes segments under 15 words from the navigation controls.
-* **Result:** The timeline retains the full structural fidelity of the conversation, but the user interaction flow is now streamlined to focus only on substantive discussion topics, eliminating unnecessary clicks.
-
-
 * **Keyword Exclusion:** Updated the `STOP_WORDS` list during display time to explicitly remove common conversational fillers detected during testing:
 > `['yeah', 'oh', 'okay', 'right', 'know', 'thing', 'et', 'cetera']`
 
+#### 3: Context Improvement
 
-
-#### 3: Content Presentation
-
-* **Summary Repetition Detection:** Implemented a validation check for summary loops.
-* *Logic:* If a 3-word phrase repeats more than 2 times in a summary, the system automatically falls back to displaying the **raw transcript** for that segment instead.
-
-
-* **Formatting:** Standardized headings and spacing for a cleaner reading experience.
+* **Timestamp Integration:** Replaced the Sentence indices with specific Timestamps (MM:SS).
+* **Issue:** Feedback indicated that "Sentence Indices" (e.g., "Sentences 405-420") provided no context regarding the actual position in the audio.
 
 ---
 
 ## 7. Results and Outputs
 
+<img width="1916" height="1017" alt="Screenshot 2026-02-16 154930" src="https://github.com/user-attachments/assets/5579449d-47cd-4cf3-9419-6cf7a4fcaa83" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 155047" src="https://github.com/user-attachments/assets/11dc80ea-eecd-4f99-a615-cc7b4ab0934a" />
+<img width="1919" height="1012" alt="Screenshot 2026-02-16 155436" src="https://github.com/user-attachments/assets/b81606fa-0800-4a4b-9eb9-47a3c767097c" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 160531" src="https://github.com/user-attachments/assets/c2de50d7-df11-4920-9fd9-2bbd808e53bf" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 160551" src="https://github.com/user-attachments/assets/9d055f50-cc83-432e-a0af-f99ed41143b4" />
+<img width="1919" height="1017" alt="Screenshot 2026-02-16 160605" src="https://github.com/user-attachments/assets/e7d3010a-ac41-4cb5-a822-016ba922b693" />
+<img width="1919" height="1016" alt="Screenshot 2026-02-16 160620" src="https://github.com/user-attachments/assets/83a1db74-8480-45fa-a62e-2530d48f26eb" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 160726" src="https://github.com/user-attachments/assets/8b135eb6-a688-4692-9e52-e2217da30592" />
+<img width="1919" height="1015" alt="Screenshot 2026-02-16 160813" src="https://github.com/user-attachments/assets/448f1762-90df-439e-96c4-b57769373ee3" />
+<img width="1919" height="979" alt="Screenshot 2026-02-16 161224" src="https://github.com/user-attachments/assets/199c8ab1-0327-44a2-9191-0405a12d44bd" />
+<img width="1919" height="979" alt="image" src="https://github.com/user-attachments/assets/067d50ec-179f-493f-b673-791f1d9b1052" />
 
-1. **Unified Library:** Dropdown menu allowing selection of pre-processed podcast episodes or uploading new files.
-2. **Interactive Timeline:** Color-coded bars (Green/Red) indicating sentiment flow across the episode.
-3. **Segment View:** Clear display of Summary, Transcript, and Keywords for the active segment.
+
+
+1. **DropDown Menu:** Dropdown menu allowing selection of pre-processed podcast episodes or uploading new files.
+2. **Interactive Timeline:** Color-coded timeline indicating sentiment flow across the episode.
+3. **Segment View:** Clear display of Summary, Transcript, and Keywords for the selected segment.
 
 ---
 
 ## 8. Limitations
 
 * **Computational Cost:** The pipeline (Whisper + Embeddings + T5) is resource-intensive and requires a GPU for reasonable processing speeds on long files.
-* **Speaker Diarization:** The current system does not distinguish between speakers (e.g., Host vs. Guest).
-* **Summary Hallucinations:** While rare after the Week 6 fix, T5 can occasionally generate generic summaries for very short text blocks.
+* **Speaker Diarization:** The current system does not differentiate between speakers (e.g., Host vs. Guest).
+* **Summary Hallucinations:** T5 can occasionally generate generic summaries for very short text blocks.
 
 ## 9. Future Work
 
-* **Audio-Timeline Synchronization:** Implementing an interactive feature where clicking a segment on the visual timeline automatically jumps the audio player to that specific timestamp, creating a truly multimodal navigation experience.
-* **Speaker Identification:** Integrating Pyannote.audio to label "Speaker A" and "Speaker B".
-* **Real-Time Processing:** Adapting the pipeline to handle live audio streams.
+* **Audio-Timeline Synchronization:** Implementing an interactive feature where clicking a segment on the timeline automatically jumps the audio player to that specific timestamp.
+* **Speaker Identification:** Integrating tools like Pyannote.audio to label "Speaker A" and "Speaker B".
 
 ---
 
 ## 10. Repository Structure
 
-Tracked (source) files:
+Source files:
 
 * `app.py`: The main **Streamlit User Interface**. Handles upload, preprocessing, transcription, segmentation, and interactive timeline.
 * `run_pipeline.py`: **Headless batch processor**. Processes all audio in `audio_input/` without the UI.
 * `audio_preprocessing.py`: Audio standardization, denoising, chunking.
-* `transcription_generation.py`: Whisper-based transcription.
-* `embedding_segmentation.py`: Semantic (embedding-based) segmentation.
-* `keywords_and_summaries.py`: TF-IDF keywords and T5 summarization.
-* `add_sentiment.py`: VADER sentiment per segment.
+* `transcription_generation.py`: Transcription.
+* `embedding_segmentation.py`: Segmentation.
+* `keywords_and_summaries.py`: Keywords and summarization.
+* `add_sentiment.py`: Sentiment per segment.
 * `requirements.txt`: Python dependencies.
 
-Folders such as `audio_input/`, `audio_processed/`, `audio_chunks/`, `transcripts/`, and `segments_runtime/` are **created automatically** on first run (or when you add audio and run the app or pipeline). You do not need to create them manually.
+Folders such as `audio_input/`, `audio_processed/`, `audio_chunks/`, `transcripts/`, and `segments_runtime/` are **created automatically** on first run. You do not need to create them manually.
 
 ---
 
