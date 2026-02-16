@@ -1,4 +1,4 @@
-# Automated Podcast Transcription and Topic Segmentation
+<img width="1914" height="1018" alt="image" src="https://github.com/user-attachments/assets/ac9494db-a227-4f2f-8851-2e273ac1b21a" /># Automated Podcast Transcription and Topic Segmentation
 
 ## 1. Project Overview
 
@@ -11,6 +11,12 @@ We developed an AI-powered pipeline that automatically transcribes audio, segmen
 * **Transcription:** Convert raw audio to accurate text using OpenAI's Whisper model.
 * **Segmentation:** Automatically detect topic shifts using semantic embeddings (SentenceTransformers) rather than simple keyword matching.
 * **Navigation:** Build a searchable, interactive UI to jump to specific topics immediately.
+
+**Significance and Real-World Applications:**
+
+* **Education & E-Learning:** Enables students to instantly locate specific concepts within long recorded lectures or seminars, transforming passive listening into active, targeted study.
+* **Accessibility:** Provides a bridge for individuals with hearing impairments by offering accurate, timestamped transcripts. Topic segmentation further aids neurodiverse users (e.g., ADHD) by breaking overwhelming audio into manageable, structured chunks.
+* **Media & Content Archiving:** Allows journalists and content creators to rapidly search through hours of interview footage to find specific quotes or soundbites without manual scrubbing.
 
 ---
 
@@ -218,6 +224,22 @@ The following code-level improvements have been successfully implemented in `app
 ---
 
 ## 7. Results and Outputs
+
+<img width="1916" height="1017" alt="Screenshot 2026-02-16 154930" src="https://github.com/user-attachments/assets/5579449d-47cd-4cf3-9419-6cf7a4fcaa83" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 155047" src="https://github.com/user-attachments/assets/11dc80ea-eecd-4f99-a615-cc7b4ab0934a" />
+<img width="1919" height="1012" alt="Screenshot 2026-02-16 155436" src="https://github.com/user-attachments/assets/b81606fa-0800-4a4b-9eb9-47a3c767097c" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 160531" src="https://github.com/user-attachments/assets/c2de50d7-df11-4920-9fd9-2bbd808e53bf" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 160551" src="https://github.com/user-attachments/assets/9d055f50-cc83-432e-a0af-f99ed41143b4" />
+<img width="1919" height="1017" alt="Screenshot 2026-02-16 160605" src="https://github.com/user-attachments/assets/e7d3010a-ac41-4cb5-a822-016ba922b693" />
+<img width="1919" height="1016" alt="Screenshot 2026-02-16 160620" src="https://github.com/user-attachments/assets/83a1db74-8480-45fa-a62e-2530d48f26eb" />
+<img width="1919" height="1019" alt="Screenshot 2026-02-16 160726" src="https://github.com/user-attachments/assets/8b135eb6-a688-4692-9e52-e2217da30592" />
+<img width="1919" height="1015" alt="Screenshot 2026-02-16 160813" src="https://github.com/user-attachments/assets/448f1762-90df-439e-96c4-b57769373ee3" />
+<img width="1919" height="979" alt="Screenshot 2026-02-16 161224" src="https://github.com/user-attachments/assets/199c8ab1-0327-44a2-9191-0405a12d44bd" />
+<img width="1919" height="979" alt="image" src="https://github.com/user-attachments/assets/067d50ec-179f-493f-b673-791f1d9b1052" />
+
+
+
+
 
 
 1. **Unified Library:** Dropdown menu allowing selection of pre-processed podcast episodes or uploading new files.
