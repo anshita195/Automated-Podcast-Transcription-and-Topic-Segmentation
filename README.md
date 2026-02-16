@@ -227,7 +227,11 @@ The following code-level improvements have been successfully implemented in `app
 <img width="1919" height="979" alt="image" src="https://github.com/user-attachments/assets/067d50ec-179f-493f-b673-791f1d9b1052" />
 
 
+<<<<<<< HEAD
 
+=======
+]
+>>>>>>> e5df268e733656f3fcc3211fdad6c3a5c112e0fb
 1. **DropDown Menu:** Dropdown menu allowing selection of pre-processed podcast episodes or uploading new files.
 2. **Interactive Timeline:** Color-coded timeline indicating sentiment flow across the episode.
 3. **Segment View:** Clear display of Summary, Transcript, and Keywords for the selected segment.
