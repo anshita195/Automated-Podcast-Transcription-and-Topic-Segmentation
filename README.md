@@ -1,4 +1,4 @@
-<img width="1914" height="1018" alt="image" src="https://github.com/user-attachments/assets/ac9494db-a227-4f2f-8851-2e273ac1b21a" /># Automated Podcast Transcription and Topic Segmentation
+# Automated Podcast Transcription and Topic Segmentation
 
 ## 1. Project Overview
 
